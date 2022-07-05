@@ -1,7 +1,7 @@
 *** Settings ***
 Documentation     Common library across the entire test suite
 
-Library    SeleniumLibrary
+Library    SeleniumLibrary    timeout=50    implicit_wait=30    run_on_failure=Take Screenshot
 
 *** Variables ***
 ${chrome_browser}    chrome
@@ -31,5 +31,5 @@ Go To CRUK Donations Page
 
 Accept cookies
      Sleep    5s
-     ${status} =    Run Keyword And Return Status    Wait Until Element Is Visible     ${accept_cookies_button}    timeout=5s
+     ${status} =    Run Keyword And Return Status    Wait Until Element Is Visible     ${accept_cookies_button}    timeout=30
      Run Keyword If      ${status}    Click Element   ${accept_cookies_button}

@@ -1,0 +1,32 @@
+# generated results
+results/
+
+# idea files
+.idea/
+
+# virtual environment
+venv/
+py3env/
+
+# debug log
+debug.log
+
+# Exclude custom scripts
+*.bat
+
+# Exclude results
+*.html
+*.xml
+*.png
+
+# Miscelaneous
+*.pyc
+TODO
+
+#IDE files
+.vscode/
+/.project
+/.settings/org.eclipse.core.resources.prefs
+.venv
+/libspecs/
+/.pydevproject

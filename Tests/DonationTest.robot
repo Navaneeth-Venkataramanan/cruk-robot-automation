@@ -1,6 +1,6 @@
 *** Settings ***
 Documentation  CRUK Test Cases
-Library    SeleniumLibrary
+Library           SeleniumLibrary
 
 Resource  ../Resources/Common.robot
 Resource  ../Resources/DonationsPage.robot
@@ -29,3 +29,4 @@ Verify Successful Donation To Cancer Research UK
     And DonationsPage.Enter Card Details    Tester    4000000000001000    1225    123
     And DonationsPage.Select Gift Aid
     When DonationsPage.Click Continue My Donation
+    Then DonationsPage.Verify Successful Donation Payment

@@ -1,9 +1,12 @@
 *** Settings ***
 Documentation     Common library across the entire test suite
-Library           SeleniumLibrary    timeout=30    run_on_failure=Take Screenshot
+Library           SeleniumLibrary    timeout=50    run_on_failure=Take Screenshot
 Library           String
 Library           DateTime
 Library           Collections
+Library           RequestsLibrary
+Library           JSONLibrary
+Library           REST
 
 *** Variables ***
 ${donation_page_otheramount_input}    xpath=//input[@id="otherAmount"]
@@ -35,9 +38,10 @@ ${donation_page_card_security_label}    xpath=//div/h3[text()="Security code "]/
 ${donation_page_card_security_iframe}    xpath=//iframe[@id='braintree-hosted-field-cvv']
 ${donation_page_security}    xpath=//input[@id="cvv"]
 ${donation_page_contactus_radio}    xpath=//legend[text()="CONTACTUS TYPE"]//parent::fieldset//span[text()="CONTACTUS RADIO"]//parent::label//div[1]
-${donation_page_reference_number}    xpath=//p[text()="Your reference number is "]/strong
+${donation_page_reference_number}    xpath=//main[@id="main"]//p[text()="Your reference number is "]/strong
 ${donation_page_continue_mydonation_button}    xpath=//button[@type="submit"]/span[contains(text(),'Complete my donation')]
 ${donation_page_gift_aid_checkbox}    xpath=//label[text()="Yes I would like Cancer Research UK to claim Gift Aid on my donation"]//parent::div
+${donation_page_donation_successful_message}    xpath=//div[contains(@class,'ProgressBar')]//li[text()="Thank you"]
 
 *** Keywords ***
 Page Title Is
@@ -88,28 +92,28 @@ Click Continue
 
 Select Address
     [Arguments]    ${address}
-    Wait Until Element Is Visible    ${donation_page_select_address_dropdown}
+    Wait Until Element Is Visible    ${donation_page_select_address_dropdown}    timeout=30
     Run Keyword And Ignore Error    Scroll Element Into View    ${donation_page_select_address_dropdown}
     Wait Until Keyword Succeeds    3x    5s    Click Element    ${donation_page_select_address_dropdown}
     ${donar_address} =    Replace String   ${donation_page_address}    ADDRESS    ${address}
-    Wait Until Element Is Visible    ${donar_address}
+    Wait Until Element Is Visible    ${donar_address}    timeout=30
     Run Keyword And Ignore Error    Scroll Element Into View    ${donar_address}
     Wait Until Keyword Succeeds    3x    5s    Click Element    ${donar_address}
 
 Enter Donor Details
     [Arguments]    ${forename}    ${surname}    ${email}    ${phonenumber}    ${postcode}    ${address}
     Wait Until Page Contains Element    ${donation_page_forename}
-    Input Text    ${donation_page_forename}    ${forename}
-    Input Text    ${donation_page_surname}    ${surname}
+    Wait Until Keyword Succeeds    3x    5s    Input Text    ${donation_page_forename}    ${forename}
+    Wait Until Keyword Succeeds    3x    5s    Input Text    ${donation_page_surname}    ${surname}
     Wait Until Page Contains Element    ${donation_page_email}
-    Mouse Over    ${donation_page_email}
-    Input Text    ${donation_page_email}    ${email}
+    Run Keyword And Ignore Error    Scroll Element Into View    ${donation_page_email}
+    Wait Until Keyword Succeeds    3x    5s    Input Text    ${donation_page_email}    ${email}
     Wait Until Page Contains Element    ${donation_page_phonenumber}
-    Mouse Over    ${donation_page_phonenumber}
-    Input Text    ${donation_page_phonenumber}    ${phonenumber}
+    Run Keyword And Ignore Error    Scroll Element Into View    ${donation_page_phonenumber}
+    Wait Until Keyword Succeeds    3x    5s    Input Text    ${donation_page_phonenumber}    ${phonenumber}
     Wait Until Page Contains Element    ${donation_page_postalcode}
     Mouse Over    ${donation_page_postalcode}
-    Input Text    ${donation_page_postalcode}    ${postcode}
+    Wait Until Keyword Succeeds    3x    5s    Input Text    ${donation_page_postalcode}    ${postcode}
     Run Keyword And Ignore Error    Scroll Element Into View    ${donar_address}
     Wait Until Keyword Succeeds    3x    5s    Click Element    ${donation_page_find_address_button}
     Select Address    ${address}
@@ -135,16 +139,18 @@ Enter Card Details
     Run Keyword And Ignore Error    Scroll Element Into View    ${donation_page_card_holder_name}
     Input Text    ${donation_page_card_holder_name}    ${cardholder_name}
     Run Keyword And Ignore Error    Scroll Element Into View    ${donation_page_card_number_label}
+    Wait Until Page Contains Element    ${donation_page_card_number_iframe}    timeout=30
     Select Frame    ${donation_page_card_number_iframe}
-    Input Text    ${donation_page_card_number}    ${card_number}
+    Wait Until Keyword Succeeds    3x    5s    Input Text    ${donation_page_card_number}    ${card_number}
     Unselect Frame
     Run Keyword And Ignore Error    Scroll Element Into View    ${donation_page_card_expiry_date_label}
+    Wait Until Page Contains Element    ${donation_page_card_expiry_date_iframe}    timeout=30
     Select Frame    ${donation_page_card_expiry_date_iframe}
-    Input Text    ${donation_page_card_expiry_date}    ${expiry_date}
+    Wait Until Keyword Succeeds    3x    5s    Input Text    ${donation_page_card_expiry_date}    ${expiry_date}
     Unselect Frame
     Run Keyword And Ignore Error    Scroll Element Into View    ${donation_page_card_security_label}
     Select Frame    ${donation_page_card_security_iframe}
-    Input Text    ${donation_page_security}    ${security}
+    Wait Until Keyword Succeeds    3x    5s    Input Text    ${donation_page_security}    ${security}
     Unselect Frame
 
 Select Gift Aid
@@ -153,12 +159,11 @@ Select Gift Aid
     Wait Until Keyword Succeeds    3x    5s    Click Element    ${donation_page_gift_aid_checkbox}
 
 Click Continue My Donation
-    Wait Until Element is Visible    ${donation_page_continue_mydonation_button}
+    Wait Until Element is Visible    ${donation_page_continue_mydonation_button}    timeout=30
     Run Keyword And Ignore Error    Scroll Element Into View    ${donation_page_continue_mydonation_button}
     Wait Until Keyword Succeeds    3x    5s    Click Element    ${donation_page_continue_mydonation_button}
 
-Verify Successful Donation With Reference Number
-    [Arguments]    ${expected_referenc_enumber}
-    Wait Until Element Is Visible    ${donation_page_reference_number}
-    ${actual_reference_number} =    Get Text    ${donation_page_reference_number}
-    Wait Until Keyword Succeeds    3x    5s    Element Text Should Be    ${actual_reference_number}    ${expected_referenc_enumber}
+Verify Successful Donation Payment
+    Wait Until Element is Visible    ${donation_page_reference_number}    timeout=30
+    ${reference_number}=    Get Text    ${donation_page_reference_number}
+    Log To Console    ${reference_number}
